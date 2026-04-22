@@ -85,7 +85,7 @@ const CMS = ({ onClose }: { onClose: () => void }) => {
   useEffect(() => {
     if (!user) return;
     const userEmail = user.email?.toLowerCase().trim();
-    if (userEmail !== "desrieprathama@gmail.com") return;
+    if (!userEmail || userEmail !== "desrieprathama@gmail.com") return;
     
     const qGuests = query(collection(db, "guests"), orderBy("createdAt", "desc"));
     const unsubscribeGuests = onSnapshot(qGuests, (snapshot) => {

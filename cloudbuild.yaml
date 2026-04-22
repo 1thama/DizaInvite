@@ -1,0 +1,40 @@
+steps:
+  # 1. Install dependencies
+  - name: 'node:lts'
+    entrypoint: 'npm'
+    args: ['install']
+
+  # 2. Run Build
+  - name: 'node:lts'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+  # 3. Commit and Push 'dist' back to GitHub
+  # Catatan: Memerlukan GITHUB_TOKEN yang disimpan di Secret Manager atau env variable
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        git config --global user.email "cloudbuild@google.com"
+        git config --global user.name "Google Cloud Build"
+        
+        # Hapus dist dari .gitignore sementara agar bisa di-commit (jika ada)
+        sed -i '/dist\//d' .gitignore
+        
+        git add dist/ -f
+        git commit -m "chore: automated build output [skip ci]" || exit 0
+        
+        # Pushing back to GitHub menggunakan token
+        # Token harus disiapkan di Cloud Build Trigger atau Secret Manager
+        git push https://x-access-token:$$GITHUB_TOKEN@github.com/${_GITHUB_REPO}.git main
+    secretEnv: ['GITHUB_TOKEN']
+
+# GANTI INI dengan konfigurasi Secret Manager Anda di Konsol Google Cloud
+availableSecrets:
+  secretManager:
+  - versionName: projects/${PROJECT_ID}/secrets/GITHUB_TOKEN/versions/latest
+    env: 'GITHUB_TOKEN'
+
+substitutions:
+  _GITHUB_REPO: 'username/repository-name' # Ganti dengan path repo Anda
