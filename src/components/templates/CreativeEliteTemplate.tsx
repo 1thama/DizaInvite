@@ -19,14 +19,14 @@ import {
   Play,
   X
 } from 'lucide-react';
-import { EliteTheme } from './CreativeEliteConfigs';
+import { EliteTheme, ELITE_CONFIGS } from './CreativeEliteConfigs';
 import { db, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc } from '../../firebase';
 
 interface CreativeEliteTemplateProps {
   invitation: any;
   guestName?: string;
   guestId?: string | null;
-  theme: EliteTheme;
+  theme?: EliteTheme;
 }
 
 const GoogleMapEmbed = ({ location }: { location: string }) => {
@@ -48,7 +48,16 @@ const GoogleMapEmbed = ({ location }: { location: string }) => {
   );
 };
 
-const CreativeEliteTemplate: React.FC<CreativeEliteTemplateProps> = ({ invitation, guestName, guestId, theme }) => {
+const CreativeEliteTemplate: React.FC<CreativeEliteTemplateProps> = ({ invitation, guestName, guestId, theme: providedTheme }) => {
+  // Safe theme fallback
+  const defaultTheme = ELITE_CONFIGS.modern_minimal;
+  const theme = {
+    ...defaultTheme,
+    ...providedTheme,
+    colors: { ...defaultTheme.colors, ...providedTheme?.colors },
+    fonts: { ...defaultTheme.fonts, ...providedTheme?.fonts }
+  };
+
   const [hasOpened, setHasOpened] = useState(false);
   const [copied, setCopied] = useState(false);
   const [wishes, setWishes] = useState<any[]>([]);

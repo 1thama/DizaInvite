@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { db, collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp } from '../firebase';
+import { db, collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp, limit } from '../firebase';
 import { 
   JavaneseRoyalTemplate,
   SundaneseRomanticTemplate,

@@ -18,14 +18,14 @@ import {
   Play,
   X
 } from 'lucide-react';
-import { ModernTheme } from './ModernStyleConfigs';
+import { ModernTheme, MODERN_CONFIGS } from './ModernStyleConfigs';
 import { db, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc } from '../../firebase';
 
 interface ModernStyleTemplateProps {
   invitation: any;
   guestName?: string;
   guestId?: string | null;
-  theme: ModernTheme;
+  theme?: ModernTheme;
 }
 
 const GoogleMapEmbed = ({ location }: { location: string }) => {
@@ -47,7 +47,16 @@ const GoogleMapEmbed = ({ location }: { location: string }) => {
   );
 };
 
-const ModernStyleTemplate: React.FC<ModernStyleTemplateProps> = ({ invitation, guestName, guestId, theme }) => {
+const ModernStyleTemplate: React.FC<ModernStyleTemplateProps> = ({ invitation, guestName, guestId, theme: providedTheme }) => {
+  // Safe theme fallback
+  const defaultTheme = MODERN_CONFIGS.modern_clean_white;
+  const theme = {
+    ...defaultTheme,
+    ...providedTheme,
+    colors: { ...defaultTheme.colors, ...providedTheme?.colors },
+    fonts: { ...defaultTheme.fonts, ...providedTheme?.fonts }
+  };
+
   const [hasOpened, setHasOpened] = useState(false);
   const [copied, setCopied] = useState(false);
   const [wishes, setWishes] = useState<any[]>([]);

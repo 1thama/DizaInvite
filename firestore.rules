@@ -91,7 +91,7 @@ service cloud.firestore {
 
     match /invitations/{invitationId} {
       allow get: if true; 
-      allow list: if isAdmin() || (isSignedIn() && isOwner(resource.data.userId)) || (request.query.limit <= 5);
+      allow list: if (request.query.limit <= 5) || isAdmin() || (isSignedIn() && isOwner(resource.data.userId));
       allow create: if isValidId(invitationId) && isValidInvitation(incoming()) && isOwner(incoming().userId) && incoming().createdAt == request.time;
       allow update: if (isAdmin() || isOwner(existing().userId)) && isValidInvitation(incoming()) && (
         incoming().slug == existing().slug && incoming().userId == existing().userId

@@ -19,14 +19,14 @@ import {
   Play,
   X
 } from 'lucide-react';
-import { NusantaraTheme } from './NusantaraConfigs';
+import { NusantaraTheme, NUSANTARA_CONFIGS } from './NusantaraConfigs';
 import { db, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc } from '../../firebase';
 
 interface NusantaraTemplateProps {
   invitation: any;
   guestName?: string;
   guestId?: string | null;
-  theme: NusantaraTheme;
+  theme?: NusantaraTheme;
 }
 
 const GoogleMapEmbed = ({ location }: { location: string }) => {
@@ -48,7 +48,17 @@ const GoogleMapEmbed = ({ location }: { location: string }) => {
   );
 };
 
-const NusantaraTemplate: React.FC<NusantaraTemplateProps> = ({ invitation, guestName, guestId, theme }) => {
+const NusantaraTemplate: React.FC<NusantaraTemplateProps> = ({ invitation, guestName, guestId, theme: providedTheme }) => {
+  // Safe theme fallback
+  const defaultTheme = NUSANTARA_CONFIGS.palembang_glory;
+  const theme = {
+    ...defaultTheme,
+    ...providedTheme,
+    colors: { ...defaultTheme.colors, ...providedTheme?.colors },
+    fonts: { ...defaultTheme.fonts, ...providedTheme?.fonts },
+    traditionalText: { ...defaultTheme.traditionalText, ...providedTheme?.traditionalText }
+  };
+
   const [hasOpened, setHasOpened] = useState(false);
   const [copied, setCopied] = useState(false);
   const [wishes, setWishes] = useState<any[]>([]);

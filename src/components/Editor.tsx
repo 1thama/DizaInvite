@@ -597,17 +597,19 @@ const Editor = () => {
           {consumer && (
             <button 
               onClick={() => setShowProfile(true)}
-              className="flex items-center gap-3 group px-4 py-2 hover:bg-rose-50 rounded-2xl transition-all"
+              className="flex items-center gap-2 sm:gap-3 group px-2 sm:px-4 py-2 hover:bg-rose-50 rounded-2xl transition-all"
               title="Profil Saya"
             >
-              <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center group-hover:bg-rose-500 transition-all">
-                <User2 className="text-rose-500 group-hover:text-white" size={16} />
-              </div>
-              <div className="hidden md:block text-left">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Diza Account</p>
-                <p className="text-xs font-bold text-slate-900 group-hover:text-rose-500 transition-colors">
-                  {consumer.name}
-                </p>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-rose-100 rounded-full flex items-center justify-center group-hover:bg-rose-500 transition-all shrink-0">
+                  <User2 className="text-rose-500 group-hover:text-white" size={14} />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1 hidden md:block text-nowrap">Diza Account</p>
+                  <p className="text-[9px] sm:text-xs font-bold text-slate-900 group-hover:text-rose-500 transition-colors line-clamp-1 max-w-[60px] sm:max-w-none">
+                    {consumer.name}
+                  </p>
+                </div>
               </div>
             </button>
           )}
@@ -1041,7 +1043,20 @@ const Editor = () => {
 
                   <div className="pt-4 border-t border-slate-100">
                     <label className="block text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Slug URL (Opsional)</label>
-                    <input type="text" name="slug" value={formData.slug} onChange={handleInputChange} placeholder="contoh: diza-thama-wedding" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm" />
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        name="slug" 
+                        value={formData.slug} 
+                        onChange={(e) => {
+                          const val = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                          setFormData(prev => ({ ...prev, slug: val }));
+                        }} 
+                        placeholder="contoh: diza-thama-wedding" 
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm" 
+                      />
+                    </div>
+                    <p className="text-[9px] text-slate-400 mt-2 px-1">Link Anda: diza.id/v/<span className="text-rose-500 font-bold">{formData.slug || '...' }</span></p>
                   </div>
                 </motion.div>
               )}
