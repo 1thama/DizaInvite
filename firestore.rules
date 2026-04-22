@@ -1,0 +1,159 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ---------------------------------------------------------------
+    // 0. Default Deny
+    // ---------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ---------------------------------------------------------------
+    // Helper Functions
+    // ---------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // Just check email for admin, keeping it simple
+      return isSignedIn() && request.auth.token.email == "desrieprathama@gmail.com";
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && userId != null && (
+        request.auth.uid == userId || 
+        (exists(/databases/$(database)/documents/consumers/$(userId)) && 
+         get(/databases/$(database)/documents/consumers/$(userId)).data.authUid == request.auth.uid)
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // ---------------------------------------------------------------
+    // Entity Validations
+    // ---------------------------------------------------------------
+
+    function isValidInvitation(data) {
+      return data.keys().hasAll(['userId', 'slug', 'templateId', 'brideName', 'groomName', 'weddingDate', 'createdAt']) &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.slug is string && data.slug.size() <= 100 &&
+             data.templateId is string && data.templateId.size() <= 64 &&
+             data.brideName is string && data.brideName.size() <= 100 &&
+             data.groomName is string && data.groomName.size() <= 100 &&
+             data.weddingDate is timestamp &&
+             data.createdAt is timestamp &&
+             (!('heroImage' in data) || (data.heroImage is string && data.heroImage.size() <= 2000)) &&
+             (!('photos' in data) || data.photos is list) &&
+             (!('gallery' in data) || data.gallery is list) &&
+             (!('language' in data) || data.language in ['id', 'en']);
+    }
+
+    function isValidGuest(data) {
+      return data.keys().hasAll(['name', 'status', 'invitationId', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.status in ['Hadir', 'Tidak Hadir', 'Pending'] &&
+             data.invitationId is string &&
+             data.createdAt is timestamp &&
+             (!('totalGuests' in data) || data.totalGuests is int) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['name', 'message', 'invitationId', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.message is string && data.message.size() > 0 && data.message.size() <= 1000 &&
+             data.invitationId is string &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidMedia(data) {
+      return data.keys().hasAll(['userId', 'url', 'type', 'createdAt']) &&
+             data.url is string && data.url.size() <= 2000 &&
+             data.type in ['image', 'audio'] &&
+             data.createdAt is timestamp;
+    }
+
+    // ---------------------------------------------------------------
+    // Resource Rules
+    // ---------------------------------------------------------------
+
+    match /invitations/{invitationId} {
+      allow get: if true; 
+      allow list: if isAdmin() || (isSignedIn() && isOwner(resource.data.userId)) || (request.query.limit <= 5);
+      allow create: if isValidId(invitationId) && isValidInvitation(incoming()) && isOwner(incoming().userId) && incoming().createdAt == request.time;
+      allow update: if (isAdmin() || isOwner(existing().userId)) && isValidInvitation(incoming()) && (
+        incoming().slug == existing().slug && incoming().userId == existing().userId
+      );
+      allow delete: if isAdmin() || isOwner(existing().userId);
+    }
+
+    match /media/{mediaId} {
+      allow get: if true;
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(mediaId) && isValidMedia(incoming()) && incoming().createdAt == request.time;
+      allow update: if (isAdmin() || isOwner(existing().userId)) && isValidMedia(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin() || isOwner(existing().userId);
+    }
+
+    match /guests/{guestId} {
+      allow get: if true;
+      allow list: if isAdmin() || (isSignedIn() && (
+        isOwner(resource.data.get('userId', '')) ||
+        (exists(/databases/$(database)/documents/invitations/$(resource.data.invitationId)) && isOwner(get(/databases/$(database)/documents/invitations/$(resource.data.invitationId)).data.userId))
+      ));
+      allow create: if isValidId(guestId) && isValidGuest(incoming()) && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/invitations/$(incoming().invitationId))
+      );
+      allow update: if (
+        isAdmin() || 
+        isOwner(resource.data.get('userId', '')) ||
+        isOwner(get(/databases/$(database)/documents/invitations/$(existing().invitationId)).data.userId) ||
+        (
+          // Public RSVP update
+          isValidGuest(incoming()) &&
+          incoming().name == existing().name &&
+          incoming().invitationId == existing().invitationId &&
+          incoming().createdAt == existing().createdAt &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'totalGuests', 'updatedAt'])
+        )
+      );
+      allow delete: if isAdmin() || isOwner(resource.data.get('userId', '')) || isOwner(get(/databases/$(database)/documents/invitations/$(existing().invitationId)).data.userId);
+    }
+
+    match /messages/{messageId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isValidId(messageId) && isValidMessage(incoming()) && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/invitations/$(incoming().invitationId))
+      );
+      allow update, delete: if isAdmin() || isOwner(resource.data.get('userId', '')) || isOwner(get(/databases/$(database)/documents/invitations/$(resource.data.invitationId)).data.userId);
+    }
+
+    match /consumers/{consumerId} {
+      allow read: if true; // Allow login lookups
+      allow update: if isAdmin() || (isSignedIn() && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['authUid', 'lastLogin']) ||
+        resource.data.get('authUid', '') == request.auth.uid
+      ));
+      allow create, delete: if isAdmin();
+    }
+
+    match /test/connection {
+      allow read: if true;
+    }
+  }
+}

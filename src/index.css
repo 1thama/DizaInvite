@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;700&family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Space+Grotesk:wght@300;500;700&family=Cinzel:wght@400;700&family=Alex+Brush&family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=Fraunces:ital,wght@0,300;0,700;1,300&family=JetBrains+Mono:wght@300;500&family=Pinyon+Script&family=Outfit:wght@300;400;600&family=Italianno&family=Cormorant+SC:wght@300;500;700&family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Sacramento&family=Prata&family=Unbounded:wght@400;700&family=Allura&family=Dancing+Script:wght@400;700&family=Parisienne&family=Quicksand:wght@300;500;700&family=Raleway:ital,wght@0,300;0,700;1,400&family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,300;0,700;1,300&family=Spectral:ital,wght@0,300;0,600;1,300&family=Marcellus&family=Tenor+Sans&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif-primary: "Playfair Display", serif;
+  --font-serif-classic: "Cormorant Garamond", serif;
+  --font-serif-editorial: "Bodoni Moda", serif;
+  --font-serif-luxury: "Cinzel", serif;
+  --font-serif-soft: "Fraunces", serif;
+  --font-serif-art: "Prata", serif;
+  --font-serif-modern: "Libre Baskerville", serif;
+  --font-serif-elegant: "Lora", serif;
+  --font-serif-sturdy: "Merriweather", serif;
+  --font-serif-sharp: "Spectral", serif;
+  --font-serif-clean: "Marcellus", serif;
+  --font-serif-minimal: "Tenor Sans", serif;
+  
+  --font-sans-modern: "Montserrat", sans-serif;
+  --font-sans-tech: "Space Grotesk", sans-serif;
+  --font-sans-bold: "Bebas Neue", sans-serif;
+  --font-sans-art: "Syne", sans-serif;
+  --font-sans-clean: "Outfit", sans-serif;
+  --font-sans-wide: "Unbounded", sans-serif;
+  --font-sans-soft: "Quicksand", sans-serif;
+  --font-sans-elegant: "Raleway", sans-serif;
+
+  --font-script-elegant: "Pinyon Script", cursive;
+  --font-script-romantic: "Great Vibes", cursive;
+  --font-script-brush: "Alex Brush", cursive;
+  --font-script-classic: "Italianno", cursive;
+  --font-script-soft: "Sacramento", cursive;
+  --font-script-art: "Allura", cursive;
+  --font-script-playful: "Dancing Script", cursive;
+  --font-script-chic: "Parisienne", cursive;
+
+  --font-mono-clean: "JetBrains Mono", monospace;
+
+  --color-brand-bg: #FDFBF7;
+  --color-brand-text: #2D463E;
+  --color-brand-accent: #C5A059;
+  --color-brand-sage: #2D463E;
+  --color-brand-gold: #C5A059;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-brand-text font-sans antialiased;
+  }
+  
+  /* Prevent auto-zoom on mobile inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Custom scrollbar for better mobile feel */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.glass-nav {
+  @apply backdrop-blur-md transition-all duration-500;
+  background: rgba(253, 251, 247, 0.7);
+  border-top: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+.elegant-border {
+  position: relative;
+  border: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+.elegant-border::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(197, 160, 89, 0.1);
+  pointer-events: none;
+}
+
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 12s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}

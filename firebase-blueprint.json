@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "guests": {
+      "title": "Guest",
+      "description": "Guest list for the wedding",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name of the guest" },
+        "status": { "type": "string", "enum": ["Hadir", "Tidak Hadir", "Pending"], "description": "RSVP status" },
+        "totalGuests": { "type": "number", "description": "Number of people attending" },
+        "invitationId": { "type": "string", "description": "ID of the associated invitation" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "status"]
+    },
+    "messages": {
+      "title": "Guestbook Message",
+      "description": "Messages from guests",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the sender" },
+        "message": { "type": "string", "description": "The message content" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "message", "createdAt"]
+    },
+    "invitations": {
+      "title": "Invitation",
+      "description": "A digital invitation created by a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The auth UID of the consumer who owns this invitation" },
+        "slug": { "type": "string", "description": "Unique URL path for the invitation" },
+        "templateId": { "type": "string", "enum": ["botanical", "minimalist", "rustic", "midnight", "sakura"], "description": "Visual theme ID" },
+        "brideName": { "type": "string", "description": "Bride's full name" },
+        "brideNickname": { "type": "string" },
+        "brideFather": { "type": "string" },
+        "brideMother": { "type": "string" },
+        "bridePhoto": { "type": "string", "description": "URL to bride photo" },
+        "groomName": { "type": "string", "description": "Groom's full name" },
+        "groomNickname": { "type": "string" },
+        "groomFather": { "type": "string" },
+        "groomMother": { "type": "string" },
+        "groomPhoto": { "type": "string", "description": "URL to groom photo" },
+        "weddingDate": { "type": "string", "format": "date-time" },
+        "akadTime": { "type": "string" },
+        "receptionTime": { "type": "string" },
+        "akadLocation": { "type": "string" },
+        "receptionLocation": { "type": "string" },
+        "akadMapLink": { "type": "string" },
+        "receptionMapLink": { "type": "string" },
+        "location": { "type": "string", "description": "Legacy general location" },
+        "musicUrl": { "type": "string", "description": "URL to background music file" },
+        "photos": { "type": "array", "items": { "type": "string" }, "description": "Array of gallery photo URLs" },
+        "gallery": { "type": "array", "items": { "type": "string" }, "description": "Extended gallery photo URLs" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "slug", "templateId", "brideName", "groomName", "weddingDate", "createdAt"]
+    },
+    "media": {
+      "title": "Media Asset",
+      "description": "Metadata for uploaded photos and music",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "url": { "type": "string" },
+        "type": { "type": "string", "enum": ["image", "audio"] },
+        "fileName": { "type": "string" },
+        "fileSize": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "url", "type", "createdAt"]
+    },
+    "consumers": {
+      "title": "Consumer",
+      "description": "User account for consumers",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "password": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "password"]
+    }
+  },
+  "firestore": {
+    "/guests/{guestId}": {
+      "schema": "guests",
+      "description": "Collection of guests"
+    },
+    "/messages/{messageId}": {
+      "schema": "messages",
+      "description": "Collection of guestbook messages"
+    },
+    "/invitations/{invitationId}": {
+      "schema": "invitations",
+      "description": "Collection of user created invitations"
+    },
+    "/consumers/{consumerId}": {
+      "schema": "consumers",
+      "description": "Collection of consumer accounts"
+    },
+    "/media/{mediaId}": {
+      "schema": "media",
+      "description": "Metadata for uploaded photos and music files"
+    }
+  }
+}
